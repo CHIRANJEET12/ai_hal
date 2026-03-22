@@ -15,3 +15,203 @@ reporting_task:
     A fully fledged report with the main topics, each with a full section of information.
     Formatted as markdown without '```'
   agent: reporting_analyst
+
+planner_task: 
+  description: >
+    Given the user query: "{user_query}"
+
+    Break it into:
+    1. intent: What the user is really asking (1-2 lines)
+    2. sub_questions: 3-5 focused sub-questions
+    3. search_queries: 3-5 optimized search engine queries
+
+    Rules:
+    - Sub-questions must be non-overlapping
+    - Keep them precise and answerable
+    - Search queries should be keyword-optimized (like Google search)
+    - Avoid vague terms
+
+    Output strictly in JSON format:
+    {
+      "intent": "...",
+      "sub_questions": ["...", "..."],
+      "search_queries": ["...", "..."]
+    }
+
+  expected_output: >
+    A structured JSON object containing intent, sub_questions, and search_queries.
+
+  agent: planner
+
+search_task_1:
+  description: >
+    Use the following search queries:
+    {search_queries}
+    
+    Retrieve:
+    - Top relevant sources (3-5)
+    - Key extracted content from each source
+
+    Output JSON:
+    {{
+      "sources": [{{"title": "...", "url": "..."}}],
+      "content": ["...", "..."]
+    }}
+
+  expected_output: >
+    JSON with sources and extracted content.
+  agent: search_agent_1
+
+search_task_2:
+  description: >
+    Use the following search queries:
+    {search_queries}
+
+    Focus on structured and reliable sources.
+
+    Output JSON:
+    {{
+      "sources": [{"title": "...", "url": "..."}],
+      "content": ["...", "..."]
+    }}
+  
+  expected_output: >
+    JSON with sources and extracted content.
+
+  agent: search_agent_2
+
+
+search_task_3:
+  description: >
+    Use the following search queries:
+    {search_queries}
+
+    Focus on deep technical insights.
+
+    Output JSON:
+    {{
+      "sources": [{"title": "...", "url": "..."}],
+      "content": ["...", "..."]
+    }}
+
+  expected_output: >
+    JSON with sources and extracted content.
+
+  agent: search_agent_3
+
+validation_task:
+  description: >
+    Given the following sources and extracted content:
+
+    SOURCES:
+    {sources}
+
+    CONTENT:
+    {content}
+
+    Perform:
+
+    1. Remove duplicate sources
+    2. Evaluate each source for credibility
+    3. Assign a score (0 to 1) based on:
+       - source reliability
+       - relevance to query
+       - agreement with other sources
+    4. Keep top 5 highest scoring sources
+    5. Keep only high-quality relevant content
+
+    Also:
+    - If multiple sources agree → increase score
+    - If content is vague or unsupported → decrease score
+
+    Output strictly in JSON:
+
+    {
+      "validated_sources": [
+        {
+          "title": "...",
+          "url": "...",
+          "score": 0.0,
+          "reason": "why this score"
+        }
+      ],
+      "validated_content": ["..."]
+    }
+
+  expected_output: >
+    JSON with scored and validated sources.
+
+  agent: source_validator
+
+
+extraction_task:
+  description: >
+    Given the validated content below:
+
+    CONTENT:
+    {content}
+
+    Perform:
+    1. Extract only factual statements
+    2. Remove redundancy
+    3. Remove vague or speculative statements
+    4. Keep statements short and precise
+    5. Ensure each point is independently understandable
+    6. If multiple statements say the same thing → merge them
+    7. Prefer statements supported by multiple sources
+
+    Output strictly in JSON:
+
+    {
+      "facts": [
+        "...",
+        "..."
+      ]
+    }
+
+  expected_output: >
+    JSON containing a list of clean factual statements.
+
+  agent: extractor
+
+answer_task:
+  description: >
+    Given the following:
+
+    FACTS:
+    {facts}
+
+    SOURCES:
+    {sources}
+
+    Generate a final answer.
+
+    Rules:
+    - Use ONLY the given facts
+    - Do NOT introduce new information
+    - Combine facts into a coherent explanation
+    - Keep it clear and structured
+    - If facts are insufficient, say "Insufficient information"
+    - If facts contradict each other, mention the conflict instead of choosing one.
+
+    Also:
+    - Mention key supporting sources
+    - Be concise but informative
+
+    Output strictly in JSON:
+
+    {
+      "answer": "...",
+      "confidence": 0.0,
+      "justification": "brief explanation of confidence"
+    }
+
+    Confidence should be based on:
+    - number of supporting sources
+    - agreement between facts
+    - average source score
+
+  expected_output: >
+    JSON with answer, confidence score, and justification.
+
+  agent: answer_generator
