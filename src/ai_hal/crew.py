@@ -20,8 +20,8 @@ class AiHal():
     def search_agent_1(self) -> Agent:
         return Agent(
             config=self.agents_config["search_agent_1"],  # type: ignore[index]
-            tools=[SerperDevTool()],
-            max_iter=2,
+            # tools=[SerperDevTool()],
+            # max_iter=2,
             verbose=True,
         )
     
