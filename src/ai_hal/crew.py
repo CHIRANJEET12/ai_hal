@@ -1,141 +1,85 @@
-from crewai import Agent, Crew, Process, Task
-from crewai.project import CrewBase, agent, crew, task
-from crewai.agents.agent_builder.base_agent import BaseAgent
+from crewai import Agent, Task, Crew, Process
+from crewai.project import CrewBase, agent, task, crew
+from crewai_tools import SerperDevTool
 
 @CrewBase
 class AiHal():
-    """AiHal crew"""
+    """AiHal crew for hallucination reduction pipeline"""
 
-    agents: list[BaseAgent]
-    tasks: list[Task]
-
-    @agent
-    def researcher(self) -> Agent:
-        return Agent(
-            config=self.agents_config['researcher'], 
-            verbose=True
-        )
-
-    @agent
-    def reporting_analyst(self) -> Agent:
-        return Agent(
-            config=self.agents_config['reporting_analyst'],
-            verbose=True
-        )
+    agents_config: 'config/agents.yaml'
+    tasks_config: 'config/tasks.yaml'
     
     @agent
     def planner(self) -> Agent:
         return Agent(
-            config=self.agents_config['planner'],
-            verbose=True
-        )
-    
+            config=self.agents_config["planner"],  # type: ignore[index]
+            # tools=[SerperDevTool()],
+            verbose=True,
+        )   
     @agent
     def search_agent_1(self) -> Agent:
         return Agent(
-            config=self.agents_config['search_agent_1'],
-            verbose=True
-        )
-
-    @agent
-    def search_agent_2(self) -> Agent:
-        return Agent(
-            config=self.agents_config['search_agent_2'],
-            verbose=True
-        )
-
-    @agent
-    def search_agent_3(self) -> Agent:
-        return Agent(
-            config=self.agents_config['search_agent_3'],
-            verbose=True
+            config=self.agents_config["search_agent_1"],  # type: ignore[index]
+            tools=[SerperDevTool()],
+            max_iter=2,
+            verbose=True,
         )
     
     @agent
     def source_validator(self) -> Agent:
         return Agent(
-            config=self.agents_config['source_validator'],
-            verbose=True
-        )
-    
+            config=self.agents_config["source_validator"],  # type: ignore[index]
+            # tools=[SerperDevTool()],
+            verbose=True,
+        )       
     @agent
     def extractor(self) -> Agent:
         return Agent(
-            config=self.agents_config['extractor'],
-            verbose=True
+            config=self.agents_config["extractor"],  # type: ignore[index]
+            # tools=[],
+            verbose=True,
         )
-    
     @agent
     def answer_generator(self) -> Agent:
         return Agent(
-            config=self.agents_config['answer_generator'],
-            verbose=True
-        )
-
-
-    @task
-    def research_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['research_task'], 
-        )
-
-    @task
-    def reporting_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['reporting_task'], 
-            output_file='report.md'
-        )
+            config=self.agents_config["answer_generator"],  # type: ignore[index]
+            # tools=[SerperDevTool()],
+            verbose=True,
+        )       
     
     @task
     def planner_task(self) -> Task:
         return Task(
-            config=self.tasks_config['planner_task'],
+            config=self.tasks_config["planner_task"],  # type: ignore[index]
         )
-    
     @task
     def search_task_1(self) -> Task:
         return Task(
-            config=self.tasks_config['search_task_1'],
-        )
-
-    @task
-    def search_task_2(self) -> Task:
-        return Task(
-            config=self.tasks_config['search_task_2'],
-        )
-
-    @task
-    def search_task_3(self) -> Task:
-        return Task(
-            config=self.tasks_config['search_task_3'],
-        )
-    
+            config=self.tasks_config["search_task_1"],  # type: ignore[index]
+        )                                                               
     @task
     def validation_task(self) -> Task:
         return Task(
-            config=self.tasks_config['validation_task'],
+            config=self.tasks_config["validation_task"],  # type: ignore[index]
         )
-    
     @task
     def extraction_task(self) -> Task:
         return Task(
-            config=self.tasks_config['extraction_task'],
+            config=self.tasks_config["extraction_task"],  # type: ignore[index]
         )
-    
     @task
     def answer_task(self) -> Task:
         return Task(
-            config=self.tasks_config['answer_task'],
+            config=self.tasks_config["answer_task"],
+            output_file="output/answer.txt"  # type: ignore[index]
         )
     
     @crew
     def crew(self) -> Crew:
-        """Creates the AiHal-Planner crew"""
-
-
+        """Creates the AiHal Crew"""
         return Crew(
-            agents=[self.planner()], 
-            tasks=[self.planner_task()], 
+            agents=self.agents,
+            tasks=self.tasks,
             process=Process.sequential,
             verbose=True,
         )
