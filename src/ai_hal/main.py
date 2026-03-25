@@ -11,7 +11,7 @@ def run():
     """
     Run the crew.
     """
-    user_query = "What is a LLM?"
+    user_query = input("Ask a question?")
     ai_hal_crew = AiHal()
 
     try:
